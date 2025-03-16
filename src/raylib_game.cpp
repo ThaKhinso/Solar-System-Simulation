@@ -27,6 +27,19 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+#include <string>
+
+Model LoadModelObb(char* filename) {
+	char* tofix = new char[strlen(filename) + 1];
+	strcpy(tofix, filename);
+	int length = strlen(filename);
+	tofix[length - 1] = 'j';
+	tofix[length - 2] = 'b';
+	tofix[length - 3] = 'o';
+	printf("Loading model %s\n", tofix);
+	return LoadModel(tofix);
+    
+}
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -38,7 +51,7 @@ int main(void)
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+    InitWindow(screenWidth, screenHeight, "Solar Systems");
     Camera camera = { 0 };
     camera.position = { 50.0f, 50.0f, 50.0f }; // Camera position
     camera.target = { 0.0f, 10.0f, 0.0f };     // Camera looking at point
