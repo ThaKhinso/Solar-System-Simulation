@@ -1,32 +1,6 @@
-﻿/*******************************************************************************************
-*
-*   raylib [core] example - Basic window
-*
-*   Example complexity rating: [★☆☆☆] 1/4
-*
-*   Welcome to raylib!
-*
-*   To test examples, just press F6 and execute 'raylib_compile_execute' script
-*   Note that compiled executable is placed in the same folder as .c file
-*
-*   To test the examples on Web, press F6 and execute 'raylib_compile_execute_web' script
-*   Web version of the program is generated in the same folder as .c file
-*
-*   You can find all basic examples on C:\raylib\raylib\examples folder or
-*   raylib official webpage: www.raylib.com
-*
-*   Enjoy using raylib. :)
-*
-*   Example originally created with raylib 1.0, last time updated with raylib 1.0
-*
-*   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
-*   BSD-like license that allows static linking with closed source software
-*
-*   Copyright (c) 2013-2025 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-
+﻿
 #include "raylib.h"
+#include "raymath.h"
 #include <string>
 
 Model LoadModelObb(char* filename) {
@@ -41,6 +15,18 @@ Model LoadModelObb(char* filename) {
     
 }
 
+struct Planet {
+	Model model;
+	Texture2D texture;
+	Vector3 position;
+	float radius;
+	float rotation;
+	float orbitSpeed;
+	float rotationSpeed;
+    uint64_t mass;
+
+};
+
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -48,8 +34,8 @@ int main(void)
 {
     // Initialization
     //--------------------------------------------------------------------------------------
-    const int screenWidth = 800;
-    const int screenHeight = 450;
+    const int screenWidth = 1920;
+    const int screenHeight = 1080;
 
     InitWindow(screenWidth, screenHeight, "Solar Systems");
     Camera camera = { 0 };
@@ -59,22 +45,39 @@ int main(void)
     camera.fovy = 45.0f;                                // Camera field-of-view Y
     camera.projection = CAMERA_PERSPECTIVE;                   // Camera mode type
 
-    Model model = LoadModel("resources/earth/Earth.obj");                 // Load model
+    Model Earth = LoadModel("resources/earth/Earth.obj");                 // Load model
     Texture2D texture = LoadTexture("resources/earth/Maps/ColorMap.jpg"); // Load model texture
-    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;            // Set map diffuse texture
+    Earth.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;            // Set map diffuse texture
+    Vector3 position = { 0,0,0 };
+	float angle = 0.0f;
+
+    Planet earth = {
+        Earth,
+        texture,
+        position,
+        20000,
+        angle,
+        5,
+        .2f,
+		5.972 * pow(10, 24)
+    };
+
+
+	Model Sun = LoadModel("resources/earth/untitled.obj");                 // Load model
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
-    Vector3 position = { 0,0,0 };
     DisableCursor();
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
+		float dt = GetFrameTime();
+		angle += .2f * dt;
+		Earth.transform = MatrixRotateY(angle);
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
         UpdateCamera(&camera, CAMERA_FREE);
-
         if (IsKeyPressed('Z')) camera.target = { 0.0f, 0.0f, 0.0f };
         ClearBackground(BLACK);
         // Draw
@@ -82,7 +85,7 @@ int main(void)
         BeginDrawing();
 
             BeginMode3D(camera);
-                DrawModel(model, position, 1, WHITE);
+                DrawModel(Earth, position, 1, WHITE);
         
             EndMode3D();
         EndDrawing();
