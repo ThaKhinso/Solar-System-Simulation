@@ -20,7 +20,7 @@ struct Planet {
 	Texture2D texture;
 	Vector3 position;
 	float radius;
-	float rotation;
+	float rotationAnglePerSecond;
 	float orbitSpeed;
 	float rotationSpeed;
     uint64_t mass;
@@ -56,13 +56,22 @@ int main(void)
         texture,
         position,
         20000,
-        angle,
+        0.000729,
         5,
         .2f,
 		5.972 * pow(10, 24)
     };
 
+    float rotationRadius = 30.0f; // Radius of the circular path
+    float rotationSpeed = 1.0f; // Speed of rotation
+    float rotationAngle = 0.0f;
 
+    //Model Moon = LoadModel("resources/moon/Moon.obj");
+	/*Texture2D MoonTexture = LoadTexture("resources/moon/Maps/ColorMap.jpg");*/
+    Vector3 moonPosition = { position.x + 100, 0, 0 };
+
+	BoundingBox box = GetModelBoundingBox(Earth);
+	
 	Model Sun = LoadModel("resources/earth/untitled.obj");                 // Load model
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -71,8 +80,14 @@ int main(void)
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
 		float dt = GetFrameTime();
-		angle += .2f * dt;
+		angle += earth.rotationAnglePerSecond / 60;
+		rotationAngle += rotationSpeed * dt;
 		Earth.transform = MatrixRotateY(angle);
+
+        Vector3 rotatingSpherePosition;
+        rotatingSpherePosition.x = (moonPosition.x - position.x) / 2.0f + rotationRadius * cosf(rotationAngle);
+        rotatingSpherePosition.y = position.y; // Keep it on the same horizontal plane
+        rotatingSpherePosition.z = position.z + rotationRadius * sinf(rotationAngle);
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
@@ -86,7 +101,8 @@ int main(void)
 
             BeginMode3D(camera);
                 DrawModel(Earth, position, 1, WHITE);
-        
+				DrawModel(Earth, rotatingSpherePosition, 1, WHITE);
+
             EndMode3D();
         EndDrawing();
         //----------------------------------------------------------------------------------
